@@ -9,30 +9,34 @@
     <ValidationSummary />
 
     <div class="mb-3">
-      <label class="form-label" for="title">ƒ^ƒCƒgƒ‹</label>
+      <label class="form-label" for="title">ã‚¿ã‚¤ãƒˆãƒ«</label>
       <InputText id="title" class="form-control" @bind-Value="Model.Title" />
         <ValidationMessage For="() => Model.Title" />
     </div>
 
     <div class="mb-3">
-        <label class="form-label" for="author">’˜Ò</label>
+        <label class="form-label" for="author">è‘—è€…</label>
         <InputText id="author" class="form-control" @bind-Value="Model.Author" />
         <ValidationMessage For="() => Model.Author" />
     </div>
 
     <div class="mb-3">
- <label class="form-label" for="memo">ƒƒ‚</label>
+ <label class="form-label" for="memo">ãƒ¡ãƒ¢</label>
         <InputTextArea id="memo" class="form-control" rows="4" @bind-Value="Model.Memo" />
         <ValidationMessage For="() => Model.Memo" />
     </div>
 
     <div class="form-check mb-3">
         <InputCheckbox id="isRead" class="form-check-input" @bind-Value="Model.IsRead" />
-        <label class="form-check-label" for="isRead">“Ç—¹</label>
+        <label class="form-check-label" for="isRead">èª­äº†</label>
     </div>
 
     <div class="d-flex gap-2">
-        <button type="submit" class="btn btn-primary">•Û‘¶</button>
+        <button type="submit" class="btn btn-primary">ä¿å­˜</button>
+        @if (IsEdit && OnDelete.HasDelegate)
+        {
+            <button type="button" class="btn btn-outline-danger" @onclick="OnDelete">å‰Šé™¤</button>
+        }
     </div>
 </EditForm>
 
@@ -44,8 +48,11 @@
     public EventCallback OnValidSubmit { get; set; }
 
     [Parameter]
-    public string Title { get; set; } = "‘ĞƒtƒH[ƒ€";
+    public string Title { get; set; } = "æ›¸ç±ãƒ•ã‚©ãƒ¼ãƒ ";
 
     [Parameter]
     public bool IsEdit { get; set; }
+
+    [Parameter]
+    public EventCallback OnDelete { get; set; }
 }
