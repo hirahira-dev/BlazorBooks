@@ -10,37 +10,37 @@
 
 <div class="mb-3 d-flex justify-content-between align-items-center">
     <div>
-        <button type="button" class="btn btn-primary" @onclick="NavigateToCreate">�V�K�o�^</button>
+        <button type="button" class="btn btn-primary" @onclick="NavigateToCreate">新規作成</button>
     </div>
 </div>
 
 <div class="card mb-3 p-3">
     <div class="row g-3 align-items-end">
         <div class="col-md-3">
-            <label class="form-label" for="titleFilter">�^�C�g��</label>
+            <label class="form-label" for="titleFilter">タイトル</label>
             <InputText id="titleFilter" class="form-control" @bind-Value="titleFilter" />
         </div>
         <div class="col-md-3">
-            <label class="form-label" for="authorFilter">����</label>
+            <label class="form-label" for="authorFilter">著者</label>
             <InputText id="authorFilter" class="form-control" @bind-Value="authorFilter" />
         </div>
         <div class="col-md-2">
-            <label class="form-label" for="isReadFilter">�Ǘ��t���O</label>
+            <label class="form-label" for="isReadFilter">読了状態</label>
             <InputSelect id="isReadFilter" class="form-select" @bind-Value="isReadFilter">
-                <option value="all">���ׂ�</option>
-                <option value="read">�Ǘ�</option>
-                <option value="unread">����</option>
+                <option value="all">すべて</option>
+                <option value="read">読了</option>
+                <option value="unread">未読</option>
             </InputSelect>
         </div>
         <div class="col-md-2">
-            <label class="form-label" for="sortOrder">���ёւ�</label>
+            <label class="form-label" for="sortOrder">並び順</label>
             <InputSelect id="sortOrder" class="form-select" @bind-Value="sortOrder">
-                <option value="created_at_desc">�o�^�� �~��</option>
-                <option value="created_at_asc">�o�^�� ����</option>
+                <option value="created_at_desc">作成日: 新しい順</option>
+                <option value="created_at_asc">作成日: 古い順</option>
             </InputSelect>
         </div>
         <div class="col-md-2">
-            <button type="button" class="btn btn-outline-primary w-100" @onclick="Search">����</button>
+            <button type="button" class="btn btn-outline-primary w-100" @onclick="Search">検索</button>
         </div>
     </div>
 </div>
@@ -52,21 +52,21 @@
 
 @if (books is null)
 {
-    <p>�ǂݍ��ݒ�...</p>
+    <p>読み込み中...</p>
 }
 else if (books.Count == 0)
 {
-    <p>�Y�����鏑�Ђ�����܂���B</p>
+    <p>データがありません。</p>
 }
 else
 {
     <table class="table table-hover">
         <thead>
             <tr>
-                <th>�^�C�g��</th>
-                <th>����</th>
-                <th>�Ǘ�</th>
-                <th>�o�^��</th>
+                <th>タイトル</th>
+                <th>著者</th>
+                <th>読了</th>
+                <th>作成日</th>
                 <th></th>
             </tr>
         </thead>
@@ -94,6 +94,7 @@ else
 
     private async Task Search()
     {
+        // 入力された検索条件を元に一覧を再取得する。
         await LoadBooksAsync();
     }
 
@@ -109,12 +110,13 @@ else
                 _ => null
             };
 
+            // フィルター条件に応じて一覧を取得する。
             books = await BookService.GetListAsync(titleFilter, authorFilter, isRead, sortOrder);
         }
         catch (Exception ex)
         {
             Console.Error.WriteLine(ex);
-            errorMessage = "�ꗗ�̎擾�Ɏ��s���܂����B���Ԃ������čēx���������������B";
+            errorMessage = "一覧の取得に失敗しました。時間をおいて再度お試しください。";
             books = new List<Book>();
         }
     }
