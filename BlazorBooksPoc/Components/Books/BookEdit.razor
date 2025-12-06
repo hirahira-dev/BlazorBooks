@@ -1,0 +1,91 @@
+@page "/books/edit/{id:int}"
+@using static Microsoft.AspNetCore.Components.Web.RenderMode
+@rendermode InteractiveServer
+@using BlazorBooksPoc.Models
+@using BlazorBooksPoc.Services
+@using BlazorBooksPoc.Components.Books
+@using Microsoft.JSInterop
+@inject IBookService BookService
+@inject NavigationManager Navigation
+@inject IJSRuntime JS
+
+@if (!string.IsNullOrEmpty(errorMessage))
+{
+    <div class="alert alert-danger" role="alert">@errorMessage</div>
+}
+else if (book is null)
+{
+    <p>読み込み中...</p>
+}
+else
+{
+    <BookForm Model="book" Title="書籍の編集" OnValidSubmit="HandleValidSubmit" IsEdit="true" />
+
+    <div class="d-flex gap-2 mt-3">
+        <button type="button" class="btn btn-outline-danger" @onclick="HandleDelete">削除</button>
+    </div>
+}
+
+@code {
+    [Parameter]
+    public int Id { get; set; }
+
+    private Book? book;
+    private string? errorMessage;
+
+    protected override async Task OnParametersSetAsync()
+    {
+        errorMessage = null;
+        book = await BookService.GetByIdAsync(Id);
+        if (book is null)
+        {
+            errorMessage = "指定された書籍が見つかりませんでした。";
+        }
+    }
+
+    private async Task HandleValidSubmit()
+    {
+        if (book is null)
+        {
+            return;
+        }
+
+        errorMessage = null;
+        try
+        {
+            await BookService.UpdateAsync(book);
+            Navigation.NavigateTo("/books");
+        }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine(ex);
+            errorMessage = "更新に失敗しました。時間をおいて再度お試しください。";
+        }
+    }
+
+    private async Task HandleDelete()
+    {
+        if (book is null)
+        {
+            return;
+        }
+
+        var confirm = await JS.InvokeAsync<bool>("confirm", "本当に削除しますか？");
+        if (!confirm)
+        {
+            return;
+        }
+
+        try
+        {
+            await BookService.DeleteAsync(book.Id);
+            Navigation.NavigateTo("/books");
+        }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine(ex);
+            errorMessage = "削除に失敗しました。時間をおいて再度お試しください。";
+        }
+    }
+}
+

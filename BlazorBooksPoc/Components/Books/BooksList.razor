@@ -1,0 +1,131 @@
+@page "/books"
+@using static Microsoft.AspNetCore.Components.Web.RenderMode
+@rendermode InteractiveServer
+@using BlazorBooksPoc.Models
+@using BlazorBooksPoc.Services
+@using BlazorBooksPoc.Components.Books
+@using Microsoft.AspNetCore.Components.Forms
+@inject IBookService BookService
+@inject NavigationManager Navigation
+
+<div class="mb-3 d-flex justify-content-between align-items-center">
+    <div>
+        <button type="button" class="btn btn-primary" @onclick="NavigateToCreate">V‹K“o˜^</button>
+    </div>
+</div>
+
+<div class="card mb-3 p-3">
+    <div class="row g-3 align-items-end">
+        <div class="col-md-3">
+            <label class="form-label" for="titleFilter">ƒ^ƒCƒgƒ‹</label>
+            <InputText id="titleFilter" class="form-control" @bind-Value="titleFilter" />
+        </div>
+        <div class="col-md-3">
+            <label class="form-label" for="authorFilter">’˜Ò</label>
+            <InputText id="authorFilter" class="form-control" @bind-Value="authorFilter" />
+        </div>
+        <div class="col-md-2">
+            <label class="form-label" for="isReadFilter">“Ç—¹ƒtƒ‰ƒO</label>
+            <InputSelect id="isReadFilter" class="form-select" @bind-Value="isReadFilter">
+                <option value="all">‚·‚×‚Ä</option>
+                <option value="read">“Ç—¹</option>
+                <option value="unread">–¢“Ç</option>
+            </InputSelect>
+        </div>
+        <div class="col-md-2">
+            <label class="form-label" for="sortOrder">•À‚Ñ‘Ö‚¦</label>
+            <InputSelect id="sortOrder" class="form-select" @bind-Value="sortOrder">
+                <option value="created_at_desc">“o˜^“ú ~‡</option>
+                <option value="created_at_asc">“o˜^“ú ¸‡</option>
+            </InputSelect>
+        </div>
+        <div class="col-md-2">
+            <button type="button" class="btn btn-outline-primary w-100" @onclick="Search">ŒŸõ</button>
+        </div>
+    </div>
+</div>
+
+@if (!string.IsNullOrEmpty(errorMessage))
+{
+    <div class="alert alert-danger" role="alert">@errorMessage</div>
+}
+
+@if (books is null)
+{
+    <p>“Ç‚İ‚İ’†...</p>
+}
+else if (books.Count == 0)
+{
+    <p>ŠY“–‚·‚é‘Ğ‚ª‚ ‚è‚Ü‚¹‚ñB</p>
+}
+else
+{
+    <table class="table table-hover">
+        <thead>
+            <tr>
+                <th>ƒ^ƒCƒgƒ‹</th>
+                <th>’˜Ò</th>
+                <th>“Ç—¹</th>
+                <th>“o˜^“ú</th>
+                <th></th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var item in books)
+            {
+                <BookListRow Item="item" OnClickEdit="() => NavigateToEdit(item.Id)" OnClickRow="() => NavigateToEdit(item.Id)" />
+            }
+        </tbody>
+    </table>
+}
+
+@code {
+    private List<Book>? books;
+    private string titleFilter = string.Empty;
+    private string authorFilter = string.Empty;
+    private string isReadFilter = "all";
+    private string sortOrder = "created_at_desc";
+    private string? errorMessage;
+
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadBooksAsync();
+    }
+
+    private async Task Search()
+    {
+        await LoadBooksAsync();
+    }
+
+    private async Task LoadBooksAsync()
+    {
+        errorMessage = null;
+        try
+        {
+            bool? isRead = isReadFilter switch
+            {
+                "read" => true,
+                "unread" => false,
+                _ => null
+            };
+
+            books = await BookService.GetListAsync(titleFilter, authorFilter, isRead, sortOrder);
+        }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine(ex);
+            errorMessage = "ˆê——‚Ìæ“¾‚É¸”s‚µ‚Ü‚µ‚½BŠÔ‚ğ‚¨‚¢‚ÄÄ“x‚¨‚µ‚­‚¾‚³‚¢B";
+            books = new List<Book>();
+        }
+    }
+
+    private void NavigateToCreate()
+    {
+        Navigation.NavigateTo("/books/create");
+    }
+
+    private void NavigateToEdit(int id)
+    {
+        Navigation.NavigateTo($"/books/edit/{id}");
+    }
+}

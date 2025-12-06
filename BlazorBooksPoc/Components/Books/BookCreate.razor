@@ -1,0 +1,43 @@
+@page "/books/create"
+@using static Microsoft.AspNetCore.Components.Web.RenderMode
+@rendermode InteractiveServer
+@using BlazorBooksPoc.Models
+@using BlazorBooksPoc.Services
+@using BlazorBooksPoc.Components.Books
+@inject IBookService BookService
+@inject NavigationManager Navigation
+
+<h3>‘Ğ‚ÌV‹K“o˜^</h3>
+<p>V‚µ‚¢‘Ğ‚ğ“o˜^‚µ‚Ü‚·B•K{€–Ú‚ğ“ü—Í‚µ‚Ä•Û‘¶‚µ‚Ä‚­‚¾‚³‚¢B</p>
+
+@if (!string.IsNullOrEmpty(errorMessage))
+{
+    <div class="alert alert-danger" role="alert">@errorMessage</div>
+}
+
+<BookForm Model="book" Title="‘Ğ‚ÌV‹K“o˜^" OnValidSubmit="HandleValidSubmit" />
+
+@code {
+    private Book book = default!;
+    private string? errorMessage;
+
+    protected override void OnInitialized()
+    {
+        book = new Book();
+    }
+
+    private async Task HandleValidSubmit()
+    {
+        errorMessage = null;
+        try
+        {
+            await BookService.CreateAsync(book);
+            Navigation.NavigateTo("/books");
+        }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine(ex);
+            errorMessage = "•Û‘¶‚É¸”s‚µ‚Ü‚µ‚½BŠÔ‚ğ‚¨‚¢‚ÄÄ“x‚¨‚µ‚­‚¾‚³‚¢B";
+        }
+    }
+}

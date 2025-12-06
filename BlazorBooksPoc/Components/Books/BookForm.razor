@@ -1,0 +1,51 @@
+@using BlazorBooksPoc.Models
+@using Microsoft.AspNetCore.Components.Forms
+@using Microsoft.AspNetCore.Components
+
+<h3>@Title</h3>
+
+<EditForm Model="Model" OnValidSubmit="OnValidSubmit">
+  <DataAnnotationsValidator />
+    <ValidationSummary />
+
+    <div class="mb-3">
+      <label class="form-label" for="title">タイトル</label>
+      <InputText id="title" class="form-control" @bind-Value="Model.Title" />
+        <ValidationMessage For="() => Model.Title" />
+    </div>
+
+    <div class="mb-3">
+        <label class="form-label" for="author">著者</label>
+        <InputText id="author" class="form-control" @bind-Value="Model.Author" />
+        <ValidationMessage For="() => Model.Author" />
+    </div>
+
+    <div class="mb-3">
+ <label class="form-label" for="memo">メモ</label>
+        <InputTextArea id="memo" class="form-control" rows="4" @bind-Value="Model.Memo" />
+        <ValidationMessage For="() => Model.Memo" />
+    </div>
+
+    <div class="form-check mb-3">
+        <InputCheckbox id="isRead" class="form-check-input" @bind-Value="Model.IsRead" />
+        <label class="form-check-label" for="isRead">読了</label>
+    </div>
+
+    <div class="d-flex gap-2">
+        <button type="submit" class="btn btn-primary">保存</button>
+    </div>
+</EditForm>
+
+@code {
+    [Parameter]
+    public Book Model { get; set; } = default!;
+
+    [Parameter]
+    public EventCallback OnValidSubmit { get; set; }
+
+    [Parameter]
+    public string Title { get; set; } = "書籍フォーム";
+
+    [Parameter]
+    public bool IsEdit { get; set; }
+}

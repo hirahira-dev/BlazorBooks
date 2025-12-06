@@ -1,0 +1,37 @@
+@using BlazorBooksPoc.Models
+@using Microsoft.AspNetCore.Components
+
+<tr class="table-row" style="cursor: pointer;" @onclick="OnRowClick">
+    <td>@Item.Title</td>
+    <td>@Item.Author</td>
+    <td>
+        <input type="checkbox" disabled checked="@Item.IsRead" />
+    </td>
+    <td>@Item.CreatedAt.ToString("yyyy/MM/dd")</td>
+    <td>
+        <button class="btn btn-sm btn-outline-primary" @onclick:stopPropagation="true" @onclick="OnClickEdit">ï“èW</button>
+    </td>
+</tr>
+
+@code {
+    [Parameter]
+    public Book Item { get; set; } = default!;
+
+    [Parameter]
+    public EventCallback OnClickEdit { get; set; }
+
+    [Parameter]
+    public EventCallback OnClickRow { get; set; }
+
+    private async Task OnRowClick()
+    {
+        if (OnClickRow.HasDelegate)
+        {
+            await OnClickRow.InvokeAsync();
+        }
+        else if (OnClickEdit.HasDelegate)
+        {
+            await OnClickEdit.InvokeAsync();
+        }
+    }
+}
