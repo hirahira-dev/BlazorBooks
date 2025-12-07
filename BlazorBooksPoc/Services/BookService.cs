@@ -13,7 +13,11 @@ public class BookService : IBookService
         _context = context;
     }
 
-    public async Task<List<Book>> GetListAsync(string? title = null, string? author = null, bool? isRead = null, string? sortOrder = null)
+    public async Task<List<Book>> GetListAsync(
+        string? title = null,
+        string? author = null,
+        ReadFilter readFilter = ReadFilter.All,
+        SortOrder sortOrder = SortOrder.CreatedAtDesc)
     {
         IQueryable<Book> query = _context.Books.AsQueryable();
 
@@ -27,14 +31,19 @@ public class BookService : IBookService
             query = query.Where(b => b.Author != null && b.Author.Contains(author));
         }
 
-        if (isRead.HasValue)
+        if (readFilter != ReadFilter.All)
         {
-            query = query.Where(b => b.IsRead == isRead.Value);
+            query = readFilter switch
+            {
+                ReadFilter.Read => query.Where(b => b.IsRead),
+                ReadFilter.Unread => query.Where(b => !b.IsRead),
+                _ => query
+            };
         }
 
         query = sortOrder switch
         {
-            "created_at_asc" => query.OrderBy(b => b.CreatedAt),
+            SortOrder.CreatedAtAsc => query.OrderBy(b => b.CreatedAt),
             _ => query.OrderByDescending(b => b.CreatedAt)
         };
 

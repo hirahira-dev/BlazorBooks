@@ -18,25 +18,25 @@
     <div class="row g-3 align-items-end">
         <div class="col-md-3">
             <label class="form-label" for="titleFilter">タイトル</label>
-            <InputText id="titleFilter" class="form-control" @bind-Value="titleFilter" />
+            <InputText id="titleFilter" class="form-control" @bind-Value="searchCondition.Title" />
         </div>
         <div class="col-md-3">
             <label class="form-label" for="authorFilter">著者</label>
-            <InputText id="authorFilter" class="form-control" @bind-Value="authorFilter" />
+            <InputText id="authorFilter" class="form-control" @bind-Value="searchCondition.Author" />
         </div>
         <div class="col-md-2">
             <label class="form-label" for="isReadFilter">読了状態</label>
-            <InputSelect id="isReadFilter" class="form-select" @bind-Value="isReadFilter">
-                <option value="all">すべて</option>
-                <option value="read">読了</option>
-                <option value="unread">未読</option>
+            <InputSelect id="isReadFilter" class="form-select" @bind-Value="searchCondition.ReadFilter">
+                <option value="@ReadFilter.All">すべて</option>
+                <option value="@ReadFilter.Read">読了</option>
+                <option value="@ReadFilter.Unread">未読</option>
             </InputSelect>
         </div>
         <div class="col-md-2">
             <label class="form-label" for="sortOrder">並び順</label>
-            <InputSelect id="sortOrder" class="form-select" @bind-Value="sortOrder">
-                <option value="created_at_desc">作成日: 新しい順</option>
-                <option value="created_at_asc">作成日: 古い順</option>
+            <InputSelect id="sortOrder" class="form-select" @bind-Value="searchCondition.SortOrder">
+                <option value="@SortOrder.CreatedAtDesc">作成日: 新しい順</option>
+                <option value="@SortOrder.CreatedAtAsc">作成日: 古い順</option>
             </InputSelect>
         </div>
         <div class="col-md-2">
@@ -81,10 +81,13 @@ else
 
 @code {
     private List<Book>? books;
-    private string titleFilter = string.Empty;
-    private string authorFilter = string.Empty;
-    private string isReadFilter = "all";
-    private string sortOrder = "created_at_desc";
+    private BookSearchCondition searchCondition = new()
+    {
+        Title = string.Empty,
+        Author = string.Empty,
+        ReadFilter = ReadFilter.All,
+        SortOrder = SortOrder.CreatedAtDesc
+    };
     private string? errorMessage;
 
     protected override async Task OnInitializedAsync()
@@ -103,15 +106,12 @@ else
         errorMessage = null;
         try
         {
-            bool? isRead = isReadFilter switch
-            {
-                "read" => true,
-                "unread" => false,
-                _ => null
-            };
-
             // フィルター条件に応じて一覧を取得する。
-            books = await BookService.GetListAsync(titleFilter, authorFilter, isRead, sortOrder);
+            books = await BookService.GetListAsync(
+                searchCondition.Title,
+                searchCondition.Author,
+                searchCondition.ReadFilter,
+                searchCondition.SortOrder);
         }
         catch (Exception ex)
         {
