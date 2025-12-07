@@ -106,21 +106,12 @@ else
         errorMessage = null;
         try
         {
-            bool? isRead = searchCondition.ReadFilter switch
-            {
-                ReadFilter.Read => true,
-                ReadFilter.Unread => false,
-                _ => null
-            };
-
-            string sortOrder = searchCondition.SortOrder switch
-            {
-                SortOrder.CreatedAtAsc => "created_at_asc",
-                _ => "created_at_desc"
-            };
-
             // フィルター条件に応じて一覧を取得する。
-            books = await BookService.GetListAsync(searchCondition.Title, searchCondition.Author, isRead, sortOrder);
+            books = await BookService.GetListAsync(
+                searchCondition.Title,
+                searchCondition.Author,
+                searchCondition.ReadFilter,
+                searchCondition.SortOrder);
         }
         catch (Exception ex)
         {
