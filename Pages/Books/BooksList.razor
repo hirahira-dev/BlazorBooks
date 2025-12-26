@@ -1,0 +1,115 @@
+﻿@page "/books"
+@using BlazorBooks.Models
+@using BlazorBooks.Services
+@inject IBookService BookService
+@inject NavigationManager Nav
+
+<div class="d-flex align-items-center mb-3">
+    <h3 class="mb-0">書籍一覧</h3>
+
+    <a class="btn btn-success ms-auto" href="/books/create">
+        新規作成
+    </a>
+</div>
+
+@* 検索条件入力エリア *@
+<div class="mb-3 p-3 border rounded">
+    <div class="row g-2">
+        <div class="col-md-4">
+            <label class="form-label">タイトル</label>
+            @* condition.Title と双方向バインディング *@
+            <InputText class="form-control" @bind-Value="condition.Title" />
+        </div>
+
+        <div class="col-md-4">
+            <label class="form-label">著者</label>
+            @* condition.Author と双方向バインディング *@
+            <InputText class="form-control" @bind-Value="condition.Author" />
+        </div>
+
+        <div class="col-md-2">
+            <label class="form-label">読了</label>
+            @* enum（ReadFilter）をそのまま選択肢に使う *@
+            <InputSelect class="form-select" @bind-Value="condition.ReadFilter">
+                <option value="@ReadFilter.All">すべて</option>
+                <option value="@ReadFilter.Read">読了</option>
+                <option value="@ReadFilter.Unread">未読</option>
+            </InputSelect>
+        </div>
+
+        <div class="col-md-2">
+            <label class="form-label">並び順</label>
+            @* enum（SortOrder）をそのまま選択肢に使う *@
+            <InputSelect class="form-select" @bind-Value="condition.SortOrder">
+                <option value="@SortOrder.CreatedAtDesc">登録日（新しい順）</option>
+                <option value="@SortOrder.CreatedAtAsc">登録日（古い順）</option>
+            </InputSelect>
+        </div>
+    </div>
+
+    <div class="mt-3 d-flex gap-2">
+        @* condition を使って一覧を再取得 *@
+        <button class="btn btn-primary" @onclick="SearchAsync">検索</button>
+
+        @* condition を初期化して一覧を再取得 *@
+        <button class="btn btn-outline-secondary" @onclick="ResetAsync">リセット</button>
+    </div>
+</div>
+
+@if (books.Count == 0)
+{
+    <p>該当する書籍がありません。</p>
+}
+else
+{
+    <table class="table table-hover">
+        <thead>
+            <tr>
+                <th>タイトル</th>
+                <th>著者</th>
+                <th>状態</th>
+                <th>登録日</th>
+            </tr>
+        </thead>
+        <tbody>
+            @* 1行表示は BookListRow に委譲し、クリック時は GoToEdit を呼ぶ *@
+            @foreach (var book in books)
+            {
+                <BookListRow Book="book" OnRowClick="GoToEdit" />
+            }
+        </tbody>
+    </table>
+}
+
+@code {
+    // 画面に表示する一覧データ
+    private List<Book> books = new();
+
+    // 検索条件
+    private BookSearchCondition condition = new();
+
+    // 初回表示時に「条件なし」で一覧を取得
+    protected override async Task OnInitializedAsync()
+    {
+        await SearchAsync();
+    }
+
+    // 現在の condition を使って一覧を取得し直す
+    private async Task SearchAsync()
+    {
+        books = await BookService.GetListAsync(condition);
+    }
+
+    // 条件を初期化して一覧を取得し直す
+    private async Task ResetAsync()
+    {
+        condition = new BookSearchCondition();
+        await SearchAsync();
+    }
+
+    // 行クリック時：編集ページへ遷移
+    private void GoToEdit(int id)
+    {
+        Nav.NavigateTo($"/books/edit/{id}");
+    }
+}

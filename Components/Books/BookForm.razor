@@ -1,0 +1,77 @@
+﻿@using System.ComponentModel.DataAnnotations
+@using BlazorBooks.Models
+
+<EditForm Model="Book" OnValidSubmit="HandleValidSubmit">
+    <DataAnnotationsValidator />
+    <ValidationSummary />
+
+    <div class="mb-3">
+        <label class="form-label">タイトル</label>
+        <InputText class="form-control" @bind-Value="Book.Title" />
+        <ValidationMessage For="@(() => Book.Title)" />
+    </div>
+
+    <div class="mb-3">
+        <label class="form-label">著者</label>
+        <InputText class="form-control" @bind-Value="Book.Author" />
+        <ValidationMessage For="@(() => Book.Author)" />
+    </div>
+
+    <div class="form-check mb-3">
+        <InputCheckbox class="form-check-input" @bind-Value="Book.IsRead" />
+        <label class="form-check-label">読了</label>
+    </div>
+
+    <div class="d-flex gap-2">
+        @* 保存ボタン *@
+        <button type="submit" class="btn btn-primary">@SubmitLabel</button>
+
+        @* 編集時だけ削除ボタンを出す *@
+        @if (IsEdit)
+        {
+            <button type="button" class="btn btn-danger ms-auto" @onclick="HandleDeleteClick">
+                削除
+            </button>
+        }
+    </div>
+</EditForm>
+
+@code {
+    // 親から受け取るBookデータ
+    [Parameter, EditorRequired]
+    public required Book Book { get; set; }
+
+    // 親から受け取る保存処理（Create/Update）
+    [Parameter]
+    public EventCallback<Book> OnValidSubmit { get; set; }
+
+    // 親から受け取る削除処理（Createの場合は受け取らない）
+    [Parameter]
+    public EventCallback<Book> OnDelete { get; set; }
+
+    // 親から受け取る編集画面かどうかのフラグ（削除ボタン表示の切替などに使う）
+    [Parameter]
+    public bool IsEdit { get; set; }
+
+    // 親から受け取るSubmitボタンの表示文字（例：保存 / 更新）
+    [Parameter]
+    public string SubmitLabel { get; set; } = "保存";
+
+    // バリデーション成功時は、親から受け取った保存処理を呼ぶ
+    private async Task HandleValidSubmit()
+    {
+        if (OnValidSubmit.HasDelegate)
+        {
+            await OnValidSubmit.InvokeAsync(Book);
+        }
+    }
+
+    // 削除ボタン押下時は、親から受け取った削除処理を呼ぶ
+    private async Task HandleDeleteClick()
+    {
+        if (OnDelete.HasDelegate)
+        {
+            await OnDelete.InvokeAsync(Book);
+        }
+    }
+}

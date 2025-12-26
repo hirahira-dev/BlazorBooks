@@ -1,0 +1,61 @@
+﻿@page "/books/edit/{Id:int}"
+@using BlazorBooks.Models
+@using BlazorBooks.Services
+@inject IBookService BookService
+@inject NavigationManager Nav
+@inject IJSRuntime JS
+
+<h3>書籍の編集</h3>
+
+@if (book is null)
+{
+    <p>書籍が見つかりません。</p>
+}
+else
+{
+    <BookForm Book="book"
+              IsEdit="true"
+              SubmitLabel="更新"
+              OnValidSubmit="HandleUpdateAsync"
+              OnDelete="HandleDeleteAsync" />
+}
+
+@code {
+    // ルートパラメータから受け取る書籍ID
+    [Parameter]
+    public int Id { get; set; }
+
+    // 編集対象のBook
+    private Book? book;
+
+    // 画面初期化時に、IDを使って編集対象のBookを取得する
+    protected override async Task OnInitializedAsync()
+    {
+        book = await BookService.GetByIdAsync(Id);
+    }
+
+    // BookFormで保存ボタンが押されたときに呼ばれる
+    private async Task HandleUpdateAsync(Book book)
+    {
+        // フォーム側で入力済みのBookをそのまま更新処理に渡す
+        await BookService.UpdateAsync(book);
+        Nav.NavigateTo("/books");
+    }
+
+    // BookFormで削除ボタンが押されたときに呼ばれる
+    private async Task HandleDeleteAsync(Book book)
+    {
+        // 削除前に確認ダイアログを表示
+        var confirmed = await JS.InvokeAsync<bool>(
+            "confirm",
+            "本当にこの書籍を削除しますか？"
+        );
+
+        // キャンセルされた場合は何もしない
+        if (!confirmed) return;
+
+        // 確認OKの場合のみ削除処理を実行
+        await BookService.DeleteAsync(book.Id);
+        Nav.NavigateTo("/books");
+    }
+}

@@ -1,0 +1,25 @@
+﻿@page "/books/create"
+@using BlazorBooks.Models
+@using BlazorBooks.Data
+@using BlazorBooks.Services
+@inject IBookService BookService
+@inject NavigationManager Nav
+
+<h3>書籍の新規登録</h3>
+<p>新しい書籍を登録します。必須項目を入力して保存してください。</p>
+
+<BookForm Book="book"
+          SubmitLabel="保存"
+          OnValidSubmit="HandleCreateAsync" />
+
+@code {
+    // 新規作成なので空の Book を用意してフォームに渡す
+    private Book book = new();
+
+    // フォーム側から Book が渡ってくる（入力済みの状態）
+    private async Task HandleCreateAsync(Book book)
+    {
+        await BookService.CreateAsync(book);
+        Nav.NavigateTo("/books");
+    }
+}

@@ -1,0 +1,28 @@
+﻿@using BlazorBooks.Models
+
+@* 一覧の「1行」を担当するコンポーネント *@
+<tr @onclick="HandleClick" style="cursor: pointer;">
+    <td>@Book.Title</td>
+    <td>@(Book.Author ?? "-")</td>
+    <td>@(Book.IsRead ? "読了" : "未読")</td>
+    <td>@Book.CreatedAt.ToString("yyyy/MM/dd")</td>
+</tr>
+
+@code {
+    // 表示対象の書籍（親から必ず渡される）
+    [Parameter, EditorRequired]
+    public Book Book { get; set; } = default!;
+
+    // 行クリック時の通知（Book.Id を親へ渡す）
+    [Parameter]
+    public EventCallback<int> OnRowClick { get; set; }
+
+    // クリックされたら、親へ Book.Id を通知する
+    private async Task HandleClick()
+    {
+        if (OnRowClick.HasDelegate)
+        {
+            await OnRowClick.InvokeAsync(Book.Id);
+        }
+    }
+}
